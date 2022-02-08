@@ -1,0 +1,8 @@
+---
+- name: Install (or update) vim and zsh
+  hosts: all
+
+  roles:
+    - role: bootstrap-zsh-vim
+      # update_only: yes
+      install_deps: yes
