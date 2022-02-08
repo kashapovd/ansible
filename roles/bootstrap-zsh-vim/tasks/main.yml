@@ -1,0 +1,77 @@
+---
+# tasks file for bootstrap-zsh-vim
+- block: #red hat based distros
+  - yum: 
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "RedHat" and install_deps == true and update_only == false
+
+- block: #debian based distros
+  - apt: 
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "Debian" and install_deps == true and update_only == false
+
+- block: #alpine
+  - apk:
+      name: ['git', 'zsh', 'vim', 'wget', 'zsh-vcs', 'shadow']
+      state: latest 
+      update_cache: true
+  when: ansible_os_family == "Alpine" and install_deps == true and update_only == false
+
+- name: change default shell
+  shell: '[[ ! $SHELL = "$(which zsh)" ]] && chsh -s "$(which zsh)" || true'
+  async: 1
+  poll: 0
+  when: update_only == false
+
+- name: remove oh-my-zsh if exists
+  file: 
+    path: '{{ ansible_env.HOME }}/.oh-my-zsh/'
+    state: absent
+  when: update_only == false
+
+- name: clone git repo with zsh and vim configs
+  git:
+    repo: https://github.com/kashapovd/dotfiles
+    dest: '{{ ansible_env.HOME }}/repos/dotfiles'
+    clone: yes
+    update: yes
+
+- name: clone Vundle repo
+  git:
+    repo: https://github.com/VundleVim/Vundle.vim.git
+    dest: '{{ ansible_env.HOME }}/.vim/bundle/Vundle.vim'
+    clone: yes
+    update: yes
+
+- name: copy zsh and vim configs
+  copy:
+    remote_src: yes
+    src: '{{ ansible_env.HOME }}/repos/dotfiles/{{ item }}'
+    dest: '{{ ansible_env.HOME }}/.{{ item }}'
+  loop:
+    - 'vimrc'
+    - 'zshrc'
+
+- name: Install Vundle plugins
+  shell: 'vim +PluginInstall +qall'
+  when: update_only == false
+
+- name: Install zsh-syntax-highlighting
+  shell: '[ ! -d "/usr/share/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /usr/share/zsh-syntax-highlighting || true'
+  when: update_only == false
+  become: yes
+
+- name: Prepare zshrc for zsh-syntax-highlighting
+  lineinfile:
+    path: '{{ ansible_env.HOME }}/.zshrc'
+    line: 'source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh'
+    state: present
+    insertafter: EOF
+
+- name: install oh-my-zsh
+  shell: 'sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc'
+  when: update_only == false

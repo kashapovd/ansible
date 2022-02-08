@@ -1,0 +1,4 @@
+---
+# vars file for bootstrap-zsh-vim
+update_only: no
+install_deps: yes
