@@ -1,28 +1,34 @@
 ---
 # tasks file for bootstrap-zsh-vim
 - block: #red hat based distros
-  - yum: 
+  - name: install packages
+    yum: 
       name: ['git', 'zsh', 'vim', 'wget']
       state: latest
       update_cache: true
   when: ansible_os_family == "RedHat" and install_deps == true and update_only == false
+  become: yes
 
 - block: #debian based distros
-  - apt: 
+  - name: install packages
+    apt:
       name: ['git', 'zsh', 'vim', 'wget']
       state: latest
       update_cache: true
   when: ansible_os_family == "Debian" and install_deps == true and update_only == false
+  become: yes
 
 - block: #alpine
-  - apk:
+  - name: install packages
+    apk:
       name: ['git', 'zsh', 'vim', 'wget', 'zsh-vcs', 'shadow']
       state: latest 
       update_cache: true
   when: ansible_os_family == "Alpine" and install_deps == true and update_only == false
+  become: yes
 
 - name: change default shell
-  shell: '[[ ! $SHELL = "$(which zsh)" ]] && chsh -s "$(which zsh)" || true'
+  shell: '[[ ! $SHELL = "/bin/zsh" ]] && chsh -s "/bin/zsh" || true'
   async: 1
   poll: 0
   when: update_only == false
@@ -36,11 +42,11 @@
 - name: clone git repo with zsh and vim configs
   git:
     repo: https://github.com/kashapovd/dotfiles
-    dest: '{{ ansible_env.HOME }}/repos/dotfiles'
+    dest: /tmp/repos/dotfiles
     clone: yes
     update: yes
 
-- name: clone Vundle repo
+- name: install Vundle plungin manager fo vim
   git:
     repo: https://github.com/VundleVim/Vundle.vim.git
     dest: '{{ ansible_env.HOME }}/.vim/bundle/Vundle.vim'
@@ -60,12 +66,16 @@
   shell: 'vim +PluginInstall +qall'
   when: update_only == false
 
-- name: Install zsh-syntax-highlighting
-  shell: '[ ! -d "/usr/share/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /usr/share/zsh-syntax-highlighting || true'
+- name: install zsh-syntax-highlighting plugin
+  git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: /usr/share/zsh-syntax-highlighting
+    clone: yes
+    update: yes
   when: update_only == false
   become: yes
 
-- name: Prepare zshrc for zsh-syntax-highlighting
+- name: prepare zshrc for zsh-syntax-highlighting
   lineinfile:
     path: '{{ ansible_env.HOME }}/.zshrc'
     line: 'source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh'
