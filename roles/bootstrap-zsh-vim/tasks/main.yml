@@ -42,7 +42,7 @@
 - name: clone git repo with zsh and vim configs
   git:
     repo: https://github.com/kashapovd/dotfiles
-    dest: /tmp/repos/dotfiles
+    dest: '{{ repos_dir }}/dotfiles'
     clone: yes
     update: yes
 
@@ -56,7 +56,7 @@
 - name: copy zsh and vim configs
   copy:
     remote_src: yes
-    src: '{{ ansible_env.HOME }}/repos/dotfiles/{{ item }}'
+    src: '{{ repos_dir }}/dotfiles/{{ item }}'
     dest: '{{ ansible_env.HOME }}/.{{ item }}'
   loop:
     - 'vimrc'
