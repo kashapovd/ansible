@@ -27,6 +27,15 @@
   when: ansible_os_family == "Alpine" and install_deps == true and update_only == false
   become: yes
 
+- block: #arch
+  - name: install packages
+    pacman:
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "Archlinux"
+  become: yes
+
 - name: change default shell
   shell: '[[ ! $SHELL = "/bin/zsh" ]] && chsh -s "/bin/zsh" || true'
   async: 1
