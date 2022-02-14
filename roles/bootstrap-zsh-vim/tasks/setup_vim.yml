@@ -1,0 +1,4 @@
+---
+- name: Install Vundle plugins
+  shell: 'vim +PluginInstall +qall'
+  when: not update_only

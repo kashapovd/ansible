@@ -1,0 +1,36 @@
+---
+- block: #red hat based distros
+  - name: install packages
+    yum: 
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "RedHat" and install_deps and not update_only
+  become: yes
+
+- block: #debian based distros
+  - name: install packages
+    apt:
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "Debian" and install_deps and not update_only
+  become: yes
+
+- block: #alpine
+  - name: install packages
+    apk:
+      name: ['git', 'zsh', 'vim', 'wget', 'zsh-vcs', 'shadow']
+      state: latest 
+      update_cache: true
+  when: ansible_os_family == "Alpine" and install_deps and not update_only
+  become: yes
+
+- block: #arch
+  - name: install packages
+    pacman:
+      name: ['git', 'zsh', 'vim', 'wget']
+      state: latest
+      update_cache: true
+  when: ansible_os_family == "Archlinux" and install_deps and not update_only
+  become: yes

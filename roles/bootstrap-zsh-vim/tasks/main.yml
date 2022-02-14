@@ -1,96 +1,14 @@
 ---
 # tasks file for bootstrap-zsh-vim
-- block: #red hat based distros
-  - name: install packages
-    yum: 
-      name: ['git', 'zsh', 'vim', 'wget']
-      state: latest
-      update_cache: true
-  when: ansible_os_family == "RedHat" and install_deps == true and update_only == false
-  become: yes
 
-- block: #debian based distros
-  - name: install packages
-    apt:
-      name: ['git', 'zsh', 'vim', 'wget']
-      state: latest
-      update_cache: true
-  when: ansible_os_family == "Debian" and install_deps == true and update_only == false
-  become: yes
+- name: include install_packages task
+  include_tasks: install_packages.yml
 
-- block: #alpine
-  - name: install packages
-    apk:
-      name: ['git', 'zsh', 'vim', 'wget', 'zsh-vcs', 'shadow']
-      state: latest 
-      update_cache: true
-  when: ansible_os_family == "Alpine" and install_deps == true and update_only == false
-  become: yes
+- name: include download_configs task
+  include_tasks: download_configs.yml
 
-- block: #arch
-  - name: install packages
-    pacman:
-      name: ['git', 'zsh', 'vim', 'wget']
-      state: latest
-      update_cache: true
-  when: ansible_os_family == "Archlinux"
-  become: yes
+- name: include setup_zsh task
+  include_tasks: setup_zsh.yml
 
-- name: change default shell
-  shell: '[[ ! $SHELL = "/bin/zsh" ]] && chsh -s "/bin/zsh" || true'
-  async: 1
-  poll: 0
-  when: update_only == false
-
-- name: remove oh-my-zsh if exists
-  file: 
-    path: '{{ ansible_env.HOME }}/.oh-my-zsh/'
-    state: absent
-  when: update_only == false
-
-- name: install Vundle plungin manager fo vim
-  git:
-    repo: https://github.com/VundleVim/Vundle.vim.git
-    dest: '{{ ansible_env.HOME }}/.vim/bundle/Vundle.vim'
-    clone: yes
-    update: yes
-  when: update_only == false
-
-- name: clone git repo with zsh and vim configs
-  git:
-    repo: https://github.com/kashapovd/dotfiles
-    dest: '{{ repos_dir }}/dotfiles'
-    clone: yes
-    update: yes
-
-- name: copy zsh and vim configs
-  copy:
-    remote_src: yes
-    src: '{{ repos_dir }}/dotfiles/{{ item }}'
-    dest: '{{ ansible_env.HOME }}/.{{ item }}'
-  loop:
-    - 'vimrc'
-    - 'zshrc'
-
-- name: Install Vundle plugins
-  shell: 'vim +PluginInstall +qall'
-  when: update_only == false
-
-- name: install zsh-syntax-highlighting plugin
-  git:
-    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-    dest: /usr/share/zsh-syntax-highlighting
-    clone: yes
-    update: yes
-  become: yes
-
-- name: prepare zshrc for zsh-syntax-highlighting
-  lineinfile:
-    path: '{{ ansible_env.HOME }}/.zshrc'
-    line: 'source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh'
-    state: present
-    insertafter: EOF
-
-- name: install oh-my-zsh
-  shell: 'sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc'
-  when: update_only == false
+- name: include setup_vim task
+  include_tasks: setup_vim.yml
