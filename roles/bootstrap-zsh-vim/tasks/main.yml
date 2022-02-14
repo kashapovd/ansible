@@ -39,17 +39,18 @@
     state: absent
   when: update_only == false
 
-- name: clone git repo with zsh and vim configs
-  git:
-    repo: https://github.com/kashapovd/dotfiles
-    dest: '{{ repos_dir }}/dotfiles'
-    clone: yes
-    update: yes
-
 - name: install Vundle plungin manager fo vim
   git:
     repo: https://github.com/VundleVim/Vundle.vim.git
     dest: '{{ ansible_env.HOME }}/.vim/bundle/Vundle.vim'
+    clone: yes
+    update: yes
+  when: update_only == false
+
+- name: clone git repo with zsh and vim configs
+  git:
+    repo: https://github.com/kashapovd/dotfiles
+    dest: '{{ repos_dir }}/dotfiles'
     clone: yes
     update: yes
 
@@ -72,7 +73,6 @@
     dest: /usr/share/zsh-syntax-highlighting
     clone: yes
     update: yes
-  when: update_only == false
   become: yes
 
 - name: prepare zshrc for zsh-syntax-highlighting
