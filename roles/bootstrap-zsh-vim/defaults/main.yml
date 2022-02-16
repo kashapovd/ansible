@@ -2,3 +2,4 @@
 update_only: no
 install_deps: yes
 repos_dir: /tmp/repos/
+zsh_plugins_dir: /usr/share/zsh/
