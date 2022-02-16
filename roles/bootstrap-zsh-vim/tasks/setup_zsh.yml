@@ -9,8 +9,9 @@
   shell: 'sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc'
   when: not update_only
 
-- name: change default shell
-  shell: '[[ ! $SHELL = "/bin/zsh" ]] && chsh -s "/bin/zsh" || true'
-  async: 1
-  poll: 0
+- name: 'change {{ansible_env.USER}} user shell'
+  user:
+    name: '{{ansible_env.USER}}'
+    shell: /bin/zsh
   when: not update_only
+  become: yes
