@@ -29,7 +29,7 @@
 - block: #arch
   - name: install packages
     pacman:
-      name: ['git', 'zsh', 'vim', 'wget']
+      name: ['git', 'zsh', 'vim', 'wget', 'most']
       state: latest
       update_cache: true
   when: ansible_os_family == "Archlinux" and install_deps and not update_only
